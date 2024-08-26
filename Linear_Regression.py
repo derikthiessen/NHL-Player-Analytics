@@ -11,7 +11,7 @@ class Linear_Regression_Model:
         self.file_path = self.prepare_path(file_name)
 
         self.data = pd.read_excel(self.file_path)
-        self.data = self.replace_missing_values(self.data)
+        self.data = self.fix_erroneous_values(self.data)
         self.data = self.impute_missing_values(self.data)
 
         # Column of the y variables
@@ -33,7 +33,7 @@ class Linear_Regression_Model:
         self.r2 = r2_score(self.y_test, self.test_predictions)
 
         print(f'The mean squared error of the model is: {self.mse}')
-        print('\n\n')
+        print('\n')
         print(f'The r2 score of the model is: {self.r2}')
 
     def prepare_path(self, file_name: str) -> str:
@@ -43,18 +43,22 @@ class Linear_Regression_Model:
 
         return os.path.join(directory, file_name)
     
-    def replace_missing_values(self, data: pd.DataFrame) -> pd.DataFrame:
-        return data.replace('-', np.nan)
+    def fix_erroneous_values(self, data: pd.DataFrame) -> pd.DataFrame:
+        data = data.replace('-', np.nan)
+        
+        for column in data.columns:
+            try:
+                data[column] = pd.to_numeric(data[column], errors = 'coerce')
+            except TypeError:
+                continue
+
+        return data
 
     def impute_missing_values(self, data: pd.DataFrame) -> pd.DataFrame:
         for column in data.columns:
             if data[column].isna().any() and column not in ['Game', 'Team', 'TOI', 'Season Type']:
-                try:
                     mean_value = data[column].mean()
-                    data[column].fillna(mean_value, inplace = True)
-                except TypeError:
-                    print(f'Could not calculate mean on {column}')
-                    break
+                    data[column] = data[column].fillna(mean_value)
             
         return data
     
