@@ -12,6 +12,7 @@ class Linear_Regression_Model:
 
         self.data = pd.read_excel(self.file_path)
         self.data = self.replace_missing_values(self.data)
+        self.data = self.impute_missing_values(self.data)
 
         # Column of the y variables
         self.dependent_variable = self.data['Win']
@@ -46,8 +47,22 @@ class Linear_Regression_Model:
         return data.replace('-', np.nan)
 
     def impute_missing_values(self, data: pd.DataFrame) -> pd.DataFrame:
-        pass
+        for column in data.columns:
+            if data[column].isna().any() and column not in ['Game', 'Team', 'TOI', 'Season Type']:
+                try:
+                    mean_value = data[column].mean()
+                    data[column].fillna(mean_value, inplace = True)
+                except TypeError:
+                    print(f'Could not calculate mean on {column}')
+                    break
+            
+        return data
     
+    '''
+    To do: some columns in excel are being stored as text when they should be numeric, 
+    need to ensure that numeric columns are being stored as such
+    '''
+
     def prepare_independent_variables(self, data: pd.DataFrame) -> pd.DataFrame:
         column_names = data.columns.tolist()
 
