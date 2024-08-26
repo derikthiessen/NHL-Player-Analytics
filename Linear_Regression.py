@@ -61,11 +61,6 @@ class Linear_Regression_Model:
                     data[column] = data[column].fillna(mean_value)
             
         return data
-    
-    '''
-    To do: some columns in excel are being stored as text when they should be numeric, 
-    need to ensure that numeric columns are being stored as such
-    '''
 
     def prepare_independent_variables(self, data: pd.DataFrame) -> pd.DataFrame:
         column_names = data.columns.tolist()
@@ -86,3 +81,10 @@ class Linear_Regression_Model:
         return model
         
 test = Linear_Regression_Model()  
+
+'''
+To do: begin analyzing each independent variables' regression coefficients and removing the variables which do not
+significantly improve the model
+
+Look at adjusted r2 score
+'''
