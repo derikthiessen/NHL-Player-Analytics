@@ -63,7 +63,7 @@ def clean_df(df: pd.DataFrame, season_type: str) -> pd.DataFrame:
 
     return df
 
-def determine_home(game_score: str, team: str) -> bool:
+def determine_home(game_score: str, team: str) -> int:
     # Get home team last word to match
     game_score_words = game_score.split()
     home_team = game_score_words[-2]
@@ -72,17 +72,17 @@ def determine_home(game_score: str, team: str) -> bool:
     team_words = team.split()
     match_team = team_words[-1]
 
-    return True if home_team == match_team else False
+    return 1 if home_team == match_team else 0
 
-def determine_winner(game_score: str, home: bool) -> bool:
+def determine_winner(game_score: str, home: int) -> int:
     home_score = int(game_score[-1])
 
     away_score_index = game_score.find(',') - 1
     away_score = int(game_score[away_score_index])
 
     if home:
-        return True if home_score > away_score else False
+        return 1 if home_score > away_score else 0
     else:
-        return False if home_score > away_score else True
+        return 0 if home_score > away_score else 1
 
 main()
