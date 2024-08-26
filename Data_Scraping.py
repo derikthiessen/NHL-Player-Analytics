@@ -1,8 +1,10 @@
 import pandas as pd
 import os
-import datetime
+from dotenv import load_dotenv
 
 def main():
+    load_dotenv()
+    
     seasons = [2020, 2021, 2022, 2023, 2024]
     regular_season_games_dfs = dict()
     postseason_games_dfs = dict()
@@ -12,14 +14,25 @@ def main():
         end_season = season
 
         regular_season_df = extract_data(start_season, end_season, 'Regular')
-        regular_season_df = clean_df(regular_season_df)
+        regular_season_df = clean_df(regular_season_df, 'Regular Season')
         regular_season_games_dfs[season] = regular_season_df
 
         postseason_df = extract_data(start_season, end_season, 'Postseason')
-        postseason_df = clean_df(postseason_df)
+        postseason_df = clean_df(postseason_df, 'Postseason')
         postseason_games_dfs[season] = postseason_df
     
-    print(regular_season_games_dfs, postseason_games_dfs, sep = '\n\n')
+    all_regular_season_dfs = pd.concat(regular_season_games_dfs.values(), ignore_index=True)
+    all_postseason_dfs = pd.concat(postseason_games_dfs.values(), ignore_index=True)
+
+    combined_df = pd.concat([all_regular_season_dfs, all_postseason_dfs], ignore_index=True)
+
+    output_path = os.getenv('OUTPUT_PATH')
+    file_name = 'NHL_game_data.xlsx'
+    path = os.path.join(output_path, file_name)
+
+    combined_df.to_excel(path, index = False)
+
+    print(f'Combined DataFrame exported to {path}')
 
 def extract_data(start_season: int, end_season: int, season_type: str) -> pd.DataFrame:
     if season_type == 'Regular':
@@ -35,7 +48,9 @@ def extract_data(start_season: int, end_season: int, season_type: str) -> pd.Dat
 
     return pd.DataFrame(data[0])
 
-def clean_df(df: pd.DataFrame) -> pd.DataFrame:
+def clean_df(df: pd.DataFrame, season_type: str) -> pd.DataFrame:
+    df['Season Type'] = season_type
+    
     df['Home'] = df.apply(lambda row: determine_home(game_score = row['Game'], team = row['Team']), axis = 1)
     
     df['Win'] = df.apply(lambda row: determine_winner(game_score = row['Game'], home = row['Home']), axis = 1)
@@ -43,7 +58,8 @@ def clean_df(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop([
              'Unnamed: 2',
              'Attendance'  
-            ], axis = 1)
+            ],
+            axis = 1)
 
     return df
 
