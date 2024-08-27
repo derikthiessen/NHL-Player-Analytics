@@ -32,9 +32,7 @@ class Linear_Regression_Model:
         self.mse = mean_squared_error(self.y_test, self.test_predictions)
         self.r2 = r2_score(self.y_test, self.test_predictions)
 
-        print(f'The mean squared error of the model is: {self.mse}')
-        print('\n')
-        print(f'The r2 score of the model is: {self.r2}')
+        self.coefficients = self.prepare_coefficients(self.model)
 
     def prepare_path(self, file_name: str) -> str:
         load_dotenv()
@@ -70,6 +68,9 @@ class Linear_Regression_Model:
         column_names.remove('Team')
         column_names.remove('TOI')
         column_names.remove('Season Type')
+
+        # Test removing this variable as it seems to have an outsized effect on model performance
+        column_names.remove('PDO')
         
         return data[column_names]
     
@@ -79,12 +80,15 @@ class Linear_Regression_Model:
         model.fit(self.x_train, self.y_train)
 
         return model
+    
+    def prepare_coefficients(self, model: LinearRegression) -> pd.Series:
+        coefficients = pd.Series(self.model.coef_, index = self.independent_variables.columns)
+
+        sorted_coefficients = coefficients.reindex(coefficients.abs().sort_values(ascending = False).index)
+
+        return sorted_coefficients
         
-test = Linear_Regression_Model()  
-
-'''
-To do: begin analyzing each independent variables' regression coefficients and removing the variables which do not
-significantly improve the model
-
-Look at adjusted r2 score
-'''
+test = Linear_Regression_Model()
+print(f'Model mse is {test.mse}', '\n\n')
+print(f'Model r2 score is {test.r2}', '\n\n')
+print('Model regression coefficients are:', test.coefficients)
