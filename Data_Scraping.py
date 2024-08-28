@@ -75,10 +75,14 @@ def determine_home(game_score: str, team: str) -> int:
     return 1 if home_team == match_team else 0
 
 def determine_winner(game_score: str, home: int) -> int:
+    game_score_words = game_score.split()
+    
     home_score = int(game_score[-1])
 
-    away_score_index = game_score.find(',') - 1
-    away_score = int(game_score[away_score_index])
+    away_score = ''
+    for word in game_score_words:
+        if ',' in word:
+            away_score = int(word[:-1])
 
     if home:
         return 1 if home_score > away_score else 0
