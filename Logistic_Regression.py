@@ -5,6 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import mean_squared_error, r2_score, accuracy_score
 from dotenv import load_dotenv
+from statsmodels.stats.outliers_influence import variance_inflation_factor
 
 class Logistic_Regression_Model:
     def __init__(self, file_name: str = 'NHL_game_data.xlsx', test_size: float = 0.2):
@@ -19,6 +20,8 @@ class Logistic_Regression_Model:
 
         # DataFrame of columns for the various x variables
         self.independent_variables = self.prepare_independent_variables(self.data)
+
+        self.vif_data = self.calculate_vif(self.independent_variables)
 
         self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.independent_variables,
                                                                                 self.dependent_variable,
@@ -95,6 +98,12 @@ class Logistic_Regression_Model:
 
         return column_names
 
+    def calculate_vif(self, independent_variables: pd.DataFrame) -> pd.DataFrame:
+        vif_data = pd.DataFrame()
+        vif_data["feature"] = independent_variables.columns
+        vif_data["VIF"] = [variance_inflation_factor(independent_variables.values, i) for i in range(len(independent_variables.columns))]
+        return vif_data
+
     def build_model(self) -> LogisticRegression:
         model = LogisticRegression(max_iter = 1000)
 
@@ -113,4 +122,5 @@ test = Logistic_Regression_Model()
 print(f'Model mse is {test.mse}', '\n\n')
 print(f'Model r2 score is {test.r2}', '\n\n')
 print(f'Model accuracy score is {test.accuracy}', '\n\n')
-print('Model regression coefficients are:', test.coefficients)
+print('Model regression coefficients are:', test.coefficients, '\n\n')
+print('Model variance inflation factors are:', test.vif_data)
