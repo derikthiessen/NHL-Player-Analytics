@@ -92,7 +92,7 @@ def determine_winner(game_score: str, home: int) -> int:
     else:
         return 0 if home_score > away_score else 1
 
-def determine_goals(game_score: str, team: str) -> list[int]:
+def determine_goals(game_score: str, team: str, toi: str, win: int) -> list[int]:
     '''
     Return a list with the first entry being the GF and the second entry being the GA
     '''
@@ -111,13 +111,22 @@ def determine_goals(game_score: str, team: str) -> list[int]:
     team_words = team.split()
     match_team = team_words[-1]
 
+    if home_team == match_team and toi == '65:00' and win == 1:
+        home_score -= 1
+    elif home_team == match_team and toi == '65:00' and win == 0:
+        away_score -= 1
+    elif toi == '65:00' and win == 1:
+        away_score -= 1
+    elif toi == '65:00' and win == 0:
+        home_score -= 1
+
     return [home_score, away_score] if home_team == match_team else [away_score, home_score]
 
 def add_scores(data: pd.DataFrame) -> pd.DataFrame:
     df = pd.DataFrame(columns = ['GF', 'GA'])
 
     for index, row in data.iterrows():
-        goals = determine_goals(game_score = row['Game'], team = row['Team'])
+        goals = determine_goals(game_score = row['Game'], team = row['Team'], toi = row['TOI'], win = row['Win'])
         df.loc[index] = goals
     
     return pd.concat([data, df], axis = 1)
