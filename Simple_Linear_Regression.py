@@ -172,12 +172,6 @@ for metric in Simple_Linear_Regression.model_data.offense_metrics:
 
 offense_metrics_regression = sort_metrics(offense_metrics_regression)
 
-print('For the offense metrics:', end = '\n\n')
-for key, value in offense_metrics_regression.items():
-    print(f'{key} metric has a regression coefficient of {value.coefficient}')
-print('\n\n')
-
-
 # Defense metrics
 defense_metrics_regression = dict()
 for metric in Simple_Linear_Regression.model_data.defense_metrics:
@@ -185,12 +179,6 @@ for metric in Simple_Linear_Regression.model_data.defense_metrics:
     defense_metrics_regression[metric] = model
 
 defense_metrics_regression = sort_metrics(defense_metrics_regression)
-
-print('For the defense metrics:', end = '\n\n')
-for key, value in defense_metrics_regression.items():
-    print(f'{key} metric has a regression coefficient of {value.coefficient}')
-print('\n\n')
-
 
 # Shooting metrics
 shooting_metrics_regression = dict()
@@ -200,12 +188,6 @@ for metric in Simple_Linear_Regression.model_data.shooting_metrics:
 
 shooting_metrics_regression = sort_metrics(shooting_metrics_regression)
 
-print('For the shooting metrics:', end = '\n\n')
-for key, value in shooting_metrics_regression.items():
-    print(f'{key} metric has a regression coefficient of {value.coefficient}')
-print('\n\n')
-
-
 # Save metrics
 save_metrics_regression = dict()
 for metric in Simple_Linear_Regression.model_data.save_metrics:
@@ -214,6 +196,22 @@ for metric in Simple_Linear_Regression.model_data.save_metrics:
 
 save_metrics_regression = sort_metrics(save_metrics_regression)
 
-print('For the save metrics:', end = '\n\n')
-for key, value in save_metrics_regression.items():
-    print(f'{key} has a regression coefficient of {value.coefficient}')
+if __name__ == '__main__':
+    print('For the offense metrics:', end = '\n\n')
+    for key, value in offense_metrics_regression.items():
+        print(f'{key} metric has a regression coefficient of {value.coefficient}')
+    print('\n\n')
+
+    print('For the defense metrics:', end = '\n\n')
+    for key, value in defense_metrics_regression.items():
+        print(f'{key} metric has a regression coefficient of {value.coefficient}')
+    print('\n\n')
+
+    print('For the shooting metrics:', end = '\n\n')
+    for key, value in shooting_metrics_regression.items():
+        print(f'{key} metric has a regression coefficient of {value.coefficient}')
+    print('\n\n')
+
+    print('For the save metrics:', end = '\n\n')
+    for key, value in save_metrics_regression.items():
+        print(f'{key} has a regression coefficient of {value.coefficient}')
