@@ -34,14 +34,16 @@ class Simple_Linear_Regression:
                       ]
     
     shooting_metrics = ['SH%', 
-                        'SV%',
                         'HDSH%',
-                        'HDSV%',
                         'MDSH%',
-                        'MDSV%',
-                        'LDSH%',
-                        'LDSV%'
+                        'LDSH%'
                        ]
+    
+    save_metrics = ['SV%',
+                    'HDSV%',
+                    'MDSV%',
+                    'LDSV%'
+                    ]
     
     def __init__(self, metric: str, file_name: str = 'NHL_game_data.xlsx', test_size: float = 0.2):
         self.file_path = self.prepare_path(file_name)
