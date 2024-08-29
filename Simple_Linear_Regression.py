@@ -103,11 +103,12 @@ class Simple_Linear_Regression:
             return data['GF']
         elif metric in Simple_Linear_Regression.defense_metrics:
             return data['GA']
-        
-        '''
-        Need to finish this preparation for shooting metrics, where I will use the difference in
-        xGF or xGA and GF or GA as the output
-        '''
+        elif metric in Simple_Linear_Regression.shooting_metrics:
+            return data['GF Above Expected']
+        elif metric in Simple_Linear_Regression.save_metrics:
+            return data['GA Above Expected']
+        else:
+            raise ValueError(f'Input metric {metric} not present in list of metrics')
 
     def build_model(self) -> LinearRegression:
         model = LinearRegression()
@@ -116,7 +117,32 @@ class Simple_Linear_Regression:
 
         return model
 
-test = Simple_Linear_Regression(metric = Simple_Linear_Regression.offense_metrics[0])
-print(f'{test.metric} MSE is {test.mse}', '\n\n')
-print(f'{test.metric} r2 score is {test.r2}', '\n\n')
-print(f'{test.metric} regression coefficient is {test.coefficient}')
+'''
+Output code
+'''
+
+# Offense metrics
+offense_metrics_regression = dict()
+for metric in Simple_Linear_Regression.offense_metrics:
+    model = Simple_Linear_Regression(metric)
+    offense_metrics_regression[metric] = model
+
+# Defense metrics
+defense_metrics_regression = dict()
+for metric in Simple_Linear_Regression.defense_metrics:
+    model = Simple_Linear_Regression(metric)
+    defense_metrics_regression[metric] = model
+
+# Shooting metrics
+shooting_metrics_regression = dict()
+for metric in Simple_Linear_Regression.shooting_metrics:
+    model = Simple_Linear_Regression(metric)
+    shooting_metrics_regression[metric] = model
+
+# Save metrics
+save_metrics_regression = dict()
+for metric in Simple_Linear_Regression.save_metrics:
+    model = Simple_Linear_Regression(metric)
+    save_metrics_regression[metric] = model
+
+print('Successfully built all models')
