@@ -159,6 +159,10 @@ class Simple_Linear_Regression:
 '''
 Output code
 '''
+def sort_metrics(metrics_regression: dict[str, Simple_Linear_Regression]) -> dict[str, Simple_Linear_Regression]:
+    return dict(sorted(metrics_regression.items(), key = lambda item: abs(item[1].coefficient), reverse = True))
+
+
 
 # Offense metrics
 offense_metrics_regression = dict()
@@ -166,11 +170,27 @@ for metric in Simple_Linear_Regression.model_data.offense_metrics:
     model = Simple_Linear_Regression(metric)
     offense_metrics_regression[metric] = model
 
+offense_metrics_regression = sort_metrics(offense_metrics_regression)
+
+print('For the offense metrics:', end = '\n\n')
+for key, value in offense_metrics_regression.items():
+    print(f'{key} metric has a regression coefficient of {value.coefficient}')
+print('\n\n')
+
+
 # Defense metrics
 defense_metrics_regression = dict()
 for metric in Simple_Linear_Regression.model_data.defense_metrics:
     model = Simple_Linear_Regression(metric)
     defense_metrics_regression[metric] = model
+
+defense_metrics_regression = sort_metrics(defense_metrics_regression)
+
+print('For the defense metrics:', end = '\n\n')
+for key, value in defense_metrics_regression.items():
+    print(f'{key} metric has a regression coefficient of {value.coefficient}')
+print('\n\n')
+
 
 # Shooting metrics
 shooting_metrics_regression = dict()
@@ -178,10 +198,22 @@ for metric in Simple_Linear_Regression.model_data.shooting_metrics:
     model = Simple_Linear_Regression(metric)
     shooting_metrics_regression[metric] = model
 
+shooting_metrics_regression = sort_metrics(shooting_metrics_regression)
+
+print('For the shooting metrics:', end = '\n\n')
+for key, value in shooting_metrics_regression.items():
+    print(f'{key} metric has a regression coefficient of {value.coefficient}')
+print('\n\n')
+
+
 # Save metrics
 save_metrics_regression = dict()
 for metric in Simple_Linear_Regression.model_data.save_metrics:
     model = Simple_Linear_Regression(metric)
     save_metrics_regression[metric] = model
 
-print('Successfully built all models')
+save_metrics_regression = sort_metrics(save_metrics_regression)
+
+print('For the save metrics:', end = '\n\n')
+for key, value in save_metrics_regression.items():
+    print(f'{key} has a regression coefficient of {value.coefficient}')
