@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 from dotenv import load_dotenv
+import datetime
 
 def main():
     load_dotenv()
@@ -56,6 +57,14 @@ def clean_df(df: pd.DataFrame, season_type: str) -> pd.DataFrame:
     df['Win'] = df.apply(lambda row: determine_winner(game_score = row['Game'], home = row['Home']), axis = 1)
 
     df = add_scores(df)
+
+    df = add_xGF(df)
+
+    df = add_xGA(df)
+
+    df = add_GF_above_expected(df)
+
+    df = add_GA_above_expected(df)
     
     df = df.drop([
              'Unnamed: 2',
@@ -130,5 +139,34 @@ def add_scores(data: pd.DataFrame) -> pd.DataFrame:
         df.loc[index] = goals
     
     return pd.concat([data, df], axis = 1)
+
+def convert_to_seconds(time_str):
+    minutes, seconds = map(int, time_str.split(':'))
+    time_delta = datetime.timedelta(minutes = minutes, seconds = seconds)
+    return int(time_delta.total_seconds())
+
+def add_xGF(data: pd.DataFrame) -> pd.DataFrame:
+    seconds_per_hour = 3600
+    
+    data['xGF'] = data.apply(lambda row: convert_to_seconds(row['TOI']) * (row['xGF/60'] / seconds_per_hour), axis = 1)
+
+    return data
+
+def add_xGA(data: pd.DataFrame) -> pd.DataFrame:
+    seconds_per_hour = 3600
+
+    data['xGA'] = data.apply(lambda row: convert_to_seconds(row['TOI']) * (row['xGA/60'] / seconds_per_hour), axis = 1)
+
+    return data
+
+def add_GF_above_expected(data: pd.DataFrame) -> pd.DataFrame:
+    data['GF Above Expected'] = data['GF'] - data['xGF']
+
+    return data
+
+def add_GA_above_expected(data: pd.DataFrame) -> pd.DataFrame:
+    data['GA Above Expected'] = data['GA'] - data['xGA']
+
+    return data
 
 main()
