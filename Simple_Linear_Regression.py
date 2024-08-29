@@ -6,8 +6,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error, r2_score
 
-class Simple_Linear_Regression:
-    offense_metrics = ['CF/60',
+class Model_Data:
+    def __init__(self, file_name: str = 'NHL_game_data.xlsx'):
+        self.offense_metrics = ['CF/60',
                        'FF/60',
                        'SF/60',
                        'xGF/60',
@@ -20,7 +21,7 @@ class Simple_Linear_Regression:
                        'LDSF/60',
                       ]
     
-    defense_metrics = ['CA/60',
+        self.defense_metrics = ['CA/60',
                        'FA/60',
                        'SA/60',
                        'xGA/60',
@@ -33,45 +34,27 @@ class Simple_Linear_Regression:
                        'LDSA/60'
                       ]
     
-    shooting_metrics = ['SH%', 
+        self.shooting_metrics = ['SH%', 
                         'HDSH%',
                         'MDSH%',
                         'LDSH%'
                        ]
     
-    save_metrics = ['SV%',
+        self.save_metrics = ['SV%',
                     'HDSV%',
                     'MDSV%',
                     'LDSV%'
                     ]
+
+        self.excel_data = self.prepare_data(file_name)
+
+    def prepare_data(self, file_name: str) -> pd.DataFrame:
+        path = self.prepare_path(file_name)
+        data = pd.read_excel(path)
+        data = self.fix_erroneous_values(data)
+        data = self.impute_missing_values(data)
+        return data
     
-    def __init__(self, metric: str, file_name: str = 'NHL_game_data.xlsx', test_size: float = 0.2):
-        self.file_path = self.prepare_path(file_name)
-        
-        self.data = pd.read_excel(self.file_path)
-        self.data = self.fix_erroneous_values(self.data)
-        self.data = self.impute_missing_values(self.data)
-
-        self.metric = metric
-        
-        self.dependent_variable = self.prepare_dependent_variable(self.metric, self.data)
-
-        self.independent_variable = self.data[[self.metric]]
-
-        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.independent_variable,
-                                                                                self.dependent_variable,
-                                                                                test_size = test_size,
-                                                                                random_state = 1)
-        
-        self.model = self.build_model()
-
-        self.test_predictions = self.model.predict(self.x_test)
-
-        self.mse = mean_squared_error(self.y_test, self.test_predictions)
-        self.r2 = r2_score(self.y_test, self.test_predictions)
-        self.coefficient = self.model.coef_
-
-
     def prepare_path(self, file_name: str) -> str:
         load_dotenv()
 
@@ -97,15 +80,71 @@ class Simple_Linear_Regression:
                     data[column] = data[column].fillna(mean_value)
             
         return data
+
+
+
+
+class Simple_Linear_Regression:
+
+    model_data = Model_Data()
+    
+    def __init__(self, metric: str, file_name: str = 'NHL_game_data.xlsx', test_size: float = 0.2):
+        
+        if file_name == 'NHL_game_data.xlsx':
+            self.data = Simple_Linear_Regression.model_data.excel_data
+        else:
+            self.file_path = file_name
+        
+            self.data = pd.read_excel(self.file_path)
+            self.data = self.fix_erroneous_values(self.data)
+            self.data = self.impute_missing_values(self.data)
+
+        self.metric = metric
+        
+        self.dependent_variable = self.prepare_dependent_variable(self.metric, self.data)
+
+        self.independent_variable = self.data[[self.metric]]
+
+        self.x_train, self.x_test, self.y_train, self.y_test = train_test_split(self.independent_variable,
+                                                                                self.dependent_variable,
+                                                                                test_size = test_size,
+                                                                                random_state = 1)
+        
+        self.model = self.build_model()
+
+        self.test_predictions = self.model.predict(self.x_test)
+
+        self.mse = mean_squared_error(self.y_test, self.test_predictions)
+        self.r2 = r2_score(self.y_test, self.test_predictions)
+        self.coefficient = self.model.coef_
+    
+    def fix_erroneous_values(self, data: pd.DataFrame) -> pd.DataFrame:
+        data = data.replace('-', np.nan)
+        
+        for column in data.columns:
+            try:
+                data[column] = pd.to_numeric(data[column], errors = 'coerce')
+            except TypeError:
+                continue
+
+        return data
+    
+    def impute_missing_values(self, data: pd.DataFrame) -> pd.DataFrame:
+        for column in data.columns:
+            if data[column].isna().any() and column not in ['Game', 'Team', 'TOI', 'Season Type']:
+                    mean_value = data[column].mean()
+                    data[column] = data[column].fillna(mean_value)
+            
+        return data
     
     def prepare_dependent_variable(self, metric: str, data: pd.DataFrame) -> pd.Series:
-        if metric in Simple_Linear_Regression.offense_metrics:
+        if metric in Simple_Linear_Regression.model_data.offense_metrics:
             return data['GF']
-        elif metric in Simple_Linear_Regression.defense_metrics:
+        elif metric in Simple_Linear_Regression.model_data.defense_metrics:
             return data['GA']
-        elif metric in Simple_Linear_Regression.shooting_metrics:
+        elif metric in Simple_Linear_Regression.model_data.shooting_metrics:
             return data['GF Above Expected']
-        elif metric in Simple_Linear_Regression.save_metrics:
+        elif metric in Simple_Linear_Regression.model_data.save_metrics:
             return data['GA Above Expected']
         else:
             raise ValueError(f'Input metric {metric} not present in list of metrics')
@@ -123,25 +162,25 @@ Output code
 
 # Offense metrics
 offense_metrics_regression = dict()
-for metric in Simple_Linear_Regression.offense_metrics:
+for metric in Simple_Linear_Regression.model_data.offense_metrics:
     model = Simple_Linear_Regression(metric)
     offense_metrics_regression[metric] = model
 
 # Defense metrics
 defense_metrics_regression = dict()
-for metric in Simple_Linear_Regression.defense_metrics:
+for metric in Simple_Linear_Regression.model_data.defense_metrics:
     model = Simple_Linear_Regression(metric)
     defense_metrics_regression[metric] = model
 
 # Shooting metrics
 shooting_metrics_regression = dict()
-for metric in Simple_Linear_Regression.shooting_metrics:
+for metric in Simple_Linear_Regression.model_data.shooting_metrics:
     model = Simple_Linear_Regression(metric)
     shooting_metrics_regression[metric] = model
 
 # Save metrics
 save_metrics_regression = dict()
-for metric in Simple_Linear_Regression.save_metrics:
+for metric in Simple_Linear_Regression.model_data.save_metrics:
     model = Simple_Linear_Regression(metric)
     save_metrics_regression[metric] = model
 
